@@ -6,6 +6,7 @@ import com.intuit.common.model.Response;
 import com.intuit.common.model.profile.Profile;
 import com.intuit.service.IProductService;
 import com.intuit.service.ProductService;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -76,6 +77,7 @@ public class ProductController {
     }
 
     @RequestMapping(value = "/transaction/get" , method = RequestMethod.POST)
+    @HystrixCommand(fallbackMethod = "getDefaultTransactionStatus")
     public ResponseEntity<Response> getTransactionStatus(@RequestBody Request request) {
         logger.info("Request Id : {} to get status of transaction {}" , MDC.get(Constants.request_id) , request.getCorrelationId());
         ResponseEntity response = productService.process(request , "getTransactionStatus");
@@ -91,5 +93,15 @@ public class ProductController {
         request.setProfile(profile);
         ResponseEntity response = productService.process(request , "getProfile");
         return response;
+    }
+
+    public ResponseEntity<Response> getDefaultTransactionStatus(@RequestBody Request request) {
+        logger.info("Returning default response as the underlying profile service is unavailable");
+        Response response = new Response();
+        response.setTransactionStatus("UNKNOWN");
+        response.setCorrelationId(request.getCorrelationId());
+        response.setMessage(PROFILE_SERVICE_UNAVAILABLE);
+        ResponseEntity responseEntity = ResponseEntity.ok().body(response);
+        return responseEntity;
     }
 }
