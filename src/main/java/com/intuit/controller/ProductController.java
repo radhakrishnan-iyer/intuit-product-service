@@ -7,6 +7,8 @@ import com.intuit.common.model.profile.Profile;
 import com.intuit.service.IProductService;
 import com.intuit.service.ProductService;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -32,6 +34,10 @@ public class ProductController {
     private IProductService validateService;
 
     @RequestMapping(value = "/profile/create" , method = RequestMethod.POST)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "request-id", value = "Request Id", required = false, allowEmptyValue = true, paramType = "header", dataTypeClass = String.class, example = "corrId"),
+            @ApiImplicitParam(name = "customer-id", value = "Customer Id", required = false, allowEmptyValue = true, paramType = "header", dataTypeClass = String.class, example = "ganesh01")
+    })
     public ResponseEntity<Response> createProfile(@RequestBody Request request) {
         logger.info("Request Id : {}" , MDC.get(Constants.request_id) );
         productService.process(request , "create");
@@ -67,6 +73,10 @@ public class ProductController {
     }
 
     @RequestMapping(value = "/profile/update" , method = RequestMethod.POST)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "request-id", value = "Request Id", required = false, allowEmptyValue = true, paramType = "header", dataTypeClass = String.class, example = "corrId"),
+            @ApiImplicitParam(name = "customer-id", value = "Customer Id", required = false, allowEmptyValue = true, paramType = "header", dataTypeClass = String.class, example = "ganesh01")
+    })
     public ResponseEntity<Response> update(@RequestBody Request request) {
         logger.info("Request Id : {}" , MDC.get(Constants.request_id) );
         productService.process(request , "update");
@@ -77,6 +87,10 @@ public class ProductController {
     }
 
     @RequestMapping(value = "/transaction/get" , method = RequestMethod.POST)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "request-id", value = "Request Id", required = false, allowEmptyValue = true, paramType = "header", dataTypeClass = String.class, example = "corrId"),
+            @ApiImplicitParam(name = "customer-id", value = "Customer Id", required = false, allowEmptyValue = true, paramType = "header", dataTypeClass = String.class, example = "ganesh01")
+    })
     @HystrixCommand(fallbackMethod = "getDefaultTransactionStatus")
     public ResponseEntity<Response> getTransactionStatus(@RequestBody Request request) {
         logger.info("Request Id : {} to get status of transaction {}" , MDC.get(Constants.request_id) , request.getCorrelationId());
@@ -85,6 +99,11 @@ public class ProductController {
     }
 
     @RequestMapping(value = "/profile/get/{profileId}" , method = RequestMethod.GET)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Content-Type", value = "Content Type", paramType = "header", dataTypeClass = String.class, defaultValue = "application/json"),
+            @ApiImplicitParam(name = "request-id", value = "Request Id", required = false, allowEmptyValue = true, paramType = "header", dataTypeClass = String.class, example = "corrId"),
+            @ApiImplicitParam(name = "customer-id", value = "Customer Id", required = false, allowEmptyValue = true, paramType = "header", dataTypeClass = String.class, example = "ganesh01")
+    })
     public ResponseEntity<Response> getProfile(@PathVariable String profileId) {
         logger.info("Request Id : {} to get details of profileId {}" , MDC.get(Constants.request_id) , profileId);
         Profile profile = new Profile();
